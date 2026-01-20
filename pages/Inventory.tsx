@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Book } from '../types';
-import { Search, Filter, BookPlus, RotateCcw, Info, Clock, Hash } from 'lucide-react';
+import { Search, BookPlus, RotateCcw, Clock, Lock, CheckCircle2 } from 'lucide-react';
 
 interface InventoryProps {
   books: Book[];
@@ -27,25 +27,40 @@ const Inventory: React.FC<InventoryProps> = ({ books, onCheckout, onReturn }) =>
   const categories = ['All', ...Array.from(new Set(books.map(b => b.category)))];
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold text-slate-800">Teacher Resource Inventory</h1>
-        <p className="text-slate-500">Academic references, pedagogical methodology, and classroom materials.</p>
+    <div className="space-y-8 animate-in fade-in duration-700">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">ELC Resource Inventory</h1>
+          <p className="text-slate-500 font-medium mt-1">Live availability tracking for the full book collection.</p>
+        </div>
+        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Available
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span> Borrowed
+          </div>
+        </div>
       </header>
 
-      <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-          <input type="text" placeholder="Search by title, author, or ISBN..." className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+      <div className="flex flex-col md:flex-row gap-4 bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+          <input type="text" placeholder="Search title, author, or ISBN..." className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
-        <select className="bg-slate-50 border-none rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+        <select className="bg-slate-50 border-none rounded-2xl px-6 py-3.5 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-700" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
           {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredBooks.map(book => (
-          <BookCard key={book.id} book={book} onCheckoutClick={() => setShowCheckoutModal(book.id)} onReturnClick={() => onReturn(book.id)} />
+          <BookCard 
+            key={book.id} 
+            book={book} 
+            onCheckoutClick={() => setShowCheckoutModal(book.id)} 
+            onReturnClick={() => onReturn(book.id)} 
+          />
         ))}
       </div>
 
@@ -65,39 +80,66 @@ const Inventory: React.FC<InventoryProps> = ({ books, onCheckout, onReturn }) =>
 
 const BookCard: React.FC<{ book: Book, onCheckoutClick: () => void, onReturnClick: () => void }> = ({ book, onCheckoutClick, onReturnClick }) => {
   const isAvailable = book.status === 'Available';
+  
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-all flex flex-col min-h-[220px]">
-      <div className="p-5 flex-1 flex flex-col">
-        <div className="flex justify-between items-start gap-2 mb-3">
-          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-wide shrink-0">
+    <div className={`group bg-white rounded-[2rem] overflow-hidden shadow-sm border-2 transition-all duration-300 flex flex-col h-full ${
+      isAvailable 
+        ? 'border-transparent hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1' 
+        : 'border-slate-50 opacity-80'
+    }`}>
+      <div className="p-6 flex-1 flex flex-col">
+        <div className="flex justify-between items-start gap-2 mb-4">
+          <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider ${
+            isAvailable ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'
+          }`}>
             {book.category}
           </span>
-          <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-sm ${isAvailable ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'}`}>
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+            isAvailable 
+              ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+              : 'bg-slate-200 text-slate-500'
+          }`}>
+            {isAvailable ? <CheckCircle2 size={12} /> : <Lock size={12} />}
             {book.status}
-          </span>
+          </div>
         </div>
         
-        <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 line-clamp-2">{book.title}</h3>
-        <p className="text-sm text-slate-600 mb-1 font-medium">{book.author}</p>
-        <p className="text-[10px] text-slate-400 font-mono uppercase tracking-tighter mb-4">ISBN: {book.isbn}</p>
+        <h3 className={`text-lg font-black leading-tight mb-2 line-clamp-2 ${isAvailable ? 'text-slate-800' : 'text-slate-400'}`}>
+          {book.title}
+        </h3>
+        <p className={`text-sm mb-1 font-bold ${isAvailable ? 'text-slate-600' : 'text-slate-400'}`}>
+          {book.author}
+        </p>
+        <p className="text-[10px] text-slate-400 font-mono tracking-tighter mb-4">ISBN: {book.isbn}</p>
         
         {!isAvailable && (
-          <div className="mt-auto mb-4 p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-100">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <Clock size={14} className="text-amber-500" />
-              <span>Due: {book.dueDate}</span>
+          <div className="mt-auto mb-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+              <Clock size={14} className="text-slate-300" />
+              <span>Due Back: {book.dueDate}</span>
             </div>
-            <p className="text-xs font-semibold text-slate-700 truncate">Held by: {book.checkedOutTo}</p>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-black text-slate-500">
+                {book.checkedOutTo?.charAt(0)}
+              </div>
+              <p className="text-[11px] font-bold text-slate-500 truncate">Held by: {book.checkedOutTo}</p>
+            </div>
           </div>
         )}
 
         <div className="mt-auto">
           {isAvailable ? (
-            <button onClick={onCheckoutClick} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl transition-colors font-semibold shadow-sm">
-              <BookPlus size={18} /> Borrow Book
+            <button 
+              onClick={onCheckoutClick} 
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl transition-all font-black shadow-lg shadow-blue-600/20 active:scale-95"
+            >
+              <BookPlus size={18} /> Borrow Resource
             </button>
           ) : (
-            <button onClick={onReturnClick} className="w-full flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-slate-300 text-slate-600 py-2 rounded-xl transition-colors font-semibold">
+            <button 
+              onClick={onReturnClick} 
+              className="w-full flex items-center justify-center gap-2 border-2 border-slate-100 hover:border-blue-100 hover:text-blue-600 text-slate-400 py-3 rounded-2xl transition-all font-black"
+            >
               <RotateCcw size={18} /> Process Return
             </button>
           )}
@@ -112,30 +154,30 @@ const CheckoutModal: React.FC<{ book: Book, onClose: () => void, onConfirm: (tid
   const [teacherName, setTeacherName] = useState('');
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-800">Assign to Teacher</h2>
-          <button onClick={onClose} className="text-slate-400 text-2xl hover:text-slate-600 transition-colors">×</button>
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Loan Assignment</h2>
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-900 transition-colors text-xl">×</button>
         </div>
-        <div className="p-6">
-          <div className="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <h3 className="font-bold text-slate-800 text-sm leading-snug">{book.title}</h3>
-            <p className="text-xs text-slate-500 mt-1">{book.author}</p>
-            <p className="text-[10px] text-slate-400 mt-2 font-mono">ISBN: {book.isbn}</p>
+        <div className="p-8">
+          <div className="mb-8 p-5 bg-blue-50 rounded-3xl border border-blue-100">
+            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Resource Selected</p>
+            <h3 className="font-black text-blue-900 text-base leading-tight">{book.title}</h3>
+            <p className="text-xs text-blue-600 mt-1 font-bold">{book.author}</p>
           </div>
-          <form onSubmit={(e) => { e.preventDefault(); onConfirm(teacherId, teacherName); }} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teacher Staff ID</label>
-              <input autoFocus type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. T-10293" value={teacherId} onChange={(e) => setTeacherId(e.target.value)} required />
+          <form onSubmit={(e) => { e.preventDefault(); onConfirm(teacherId, teacherName); }} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Faculty Staff ID</label>
+              <input autoFocus type="text" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-blue-500 transition-all outline-none font-medium" placeholder="e.g. T-12345" value={teacherId} onChange={(e) => setTeacherId(e.target.value)} required />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name & Dept</label>
-              <input type="text" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. Prof. Ahmed - English Dept" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} required />
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Teacher Full Name</label>
+              <input type="text" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus:border-blue-500 transition-all outline-none font-medium" placeholder="e.g. Sarah J. Mitchell" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} required />
             </div>
-            <div className="pt-4 flex gap-3">
-              <button type="button" onClick={onClose} className="flex-1 px-4 py-3 rounded-xl font-semibold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
-              <button type="submit" className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95">Complete Loan</button>
+            <div className="pt-6 flex gap-3">
+              <button type="button" onClick={onClose} className="flex-1 px-4 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 transition-colors">Cancel</button>
+              <button type="submit" className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-600/20 transition-all active:scale-95">Complete Checkout</button>
             </div>
           </form>
         </div>
